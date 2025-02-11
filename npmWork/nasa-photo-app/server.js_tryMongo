@@ -1,0 +1,38 @@
+require("dotenv").config(); 
+const express = require("express"); 
+const axios = require("axios"); 
+const cors = require("cors"); 
+const bcrypt = require("bcryptjs"); 
+const session = require("express-session"); 
+const mongoose = require("mongoose"); 
+const MongoStore = require("connect-mongo"); 
+const app = express(); 
+const PORT = process.env.PORT || 5000; 
+const NASA_API_KEY = process.env.NASA_API_KEY; 
+const NASA_APOD_URL = "https://api.nasa.gov/planetary/apod"; 
+console.log(`MONGO_URI ${process.env.MONGO_URI}`) ;
+// Database connection 
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => { console.log(`Connection Successfull`) }).catch((err) => { console.log(`Received an Error`) }); 
+// Middleware 
+app.use(cors({ origin: "http://localhost:3000", credentials: true })); 
+app.use(express.json()); 
+app.use( session({ secret: process.env.SESSION_SECRET || "secret", resave: false, saveUninitialized: false, store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }), cookie: { maxAge: 10 * 60 * 1000 }, // Auto logout after 10 mins 
+}) ); 
+// Dummy Users List 
+const users = [ { username: "admin", password: bcrypt.hashSync("admin123", 10) }, { username: "user1", password: bcrypt.hashSync("password", 10) }, ]; 
+// Authentication Middleware 
+const isAuthenticated = (req, res, next) => { if (req.session.user) return next(); return res.status(401).json({ message: "Unauthorized" }); }; 
+// Login Route 
+app.post("/api/login", (req, res) => { const { username, password } = req.body; 
+const user = users.find((u) => u.username === username); if (!user || !bcrypt.compareSync(password, user.password)) { return res.status(401).json({ message: "Invalid username or password" }); } 
+req.session.user = username; res.json({ message: "Login successful", username }); }); 
+// Logout Route 
+app.post("/api/logout", (req, res) => { req.session.destroy(() => { res.json({ message: "Logged out successfully" }); }); }); 
+// Fetch Photos (Protected) 
+app.get("/api/photos", isAuthenticated, async (req, res) => { try { const { search, date, page = 1 } = req.query; 
+const count = 50; const response = await axios.get(`${NASA_APOD_URL}?api_key=${NASA_API_KEY}&count=${count}`); 
+let photos = response.data; if (search) { photos = photos.filter((photo) => photo.title.toLowerCase().includes(search.toLowerCase())); } 
+if (date) { photos = photos.filter((photo) => photo.date === date); } 
+const pageSize = 10; const startIndex = (page - 1) * pageSize; const paginatedPhotos = photos.slice(startIndex, startIndex + pageSize); 
+res.json({ photos: paginatedPhotos, total: photos.length }); } catch (error) { res.status(500).json({ message: "Error fetching data from NASA API" }); } }); 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
