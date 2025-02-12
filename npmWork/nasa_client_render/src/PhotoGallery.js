@@ -8,7 +8,7 @@ const [search, setSearch] = useState(""); const [date, setDate] = useState("");
 const [page, setPage] = useState(1); const [total, setTotal] = useState(0); 
 const [loading, setLoading] = useState(false); const [showExplanations, setShowExplanations] = useState({}); 
 const navigate = useNavigate(); useEffect(() => { fetchPhotos(); }, [search, date, page]); 
-const fetchPhotos = () => { setLoading(true); axios .get("http://localhost:5000/api/photos", { params: { search, date, page } }).then((response) => { 
+const fetchPhotos = () => { setLoading(true); axios .get("https://nasa-photo-demo.onrender.com/api/photos", { params: { search, date, page } }).then((response) => { 
 setPhotos(response.data.photos); setTotal(response.data.total); setLoading(false); }).catch((error) => { console.error("Error fetching data:", error); setLoading(false); }); }; 
 const handleSearchChange = (e) => { setSearch(e.target.value); setPage(1); resetTimer(); }; 
 const handleDateChange = (e) => { setDate(e.target.value); setPage(1); resetTimer(); }; 
