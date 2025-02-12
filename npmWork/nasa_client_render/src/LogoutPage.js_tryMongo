@@ -1,0 +1,6 @@
+import React, { useEffect } from "react"; 
+import axios from "axios"; 
+import { useNavigate } from "react-router-dom"; 
+function LogoutPage({ setUser }) { const navigate = useNavigate(); useEffect(() => { axios.post("http://localhost:5000/api/logout").then(() => 
+{ setUser(false); navigate("/login"); }); }, [setUser, navigate]); return <h2>Logging out...</h2>; } 
+export default LogoutPage;
