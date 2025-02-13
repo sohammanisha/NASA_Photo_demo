@@ -13,7 +13,7 @@ const NASA_API_KEY = process.env.NASA_API_KEY;
 const NASA_APOD_URL = "https://api.nasa.gov/planetary/apod"; 
 app.use(cors()); app.use(express.json()); 
 console.log(`Manisha Server.`) ;
-//console.log(`${process.env.MONGODB_URI}`);
+console.log(`${process.env.MONGODB_URI}`);
 // Database connection 
 mongoose.connect(`${process.env.MONGODB_URI}`, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => { 
 console.log("Connection to DB Successfull") }).catch((err) => { 
