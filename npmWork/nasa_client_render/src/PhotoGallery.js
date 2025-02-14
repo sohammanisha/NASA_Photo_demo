@@ -37,7 +37,8 @@ function PhotoGallery({ resetTimer }) { const [photos, setPhotos] = useState([])
                                                                                        style={{ marginBottom: "20px" }}>Logout</button> {/* Search Filters */}
         <div style={{ marginBottom: "20px" }}>
             <input type="text" placeholder="Search by title" value={search} onChange={handleSearchChange} style={{ padding: "8px", marginRight: "10px" }} />
-        </div> {/* Loading Spinner */}
+        </div>
+        {/* Loading Spinner */}
         {loading ? ( <p>Loading, Please Wait...</p> ) : ( <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}> {photos.map((photo, index) => (
             <div key={index} style={{ margin: "20px", maxWidth: "400px" }}>
                 <h3>{photo.title}</h3> <img src={photo.url} alt={photo.title} style={{ width: "100%", borderRadius: "10px" }} />
