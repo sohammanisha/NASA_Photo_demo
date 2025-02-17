@@ -10,6 +10,8 @@ const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo");
 //const { defineSearchByTitleFilter, defineSearchByDateFilter } = require("./search/searchHelper.js");
 const { defineSearchByTitleFilter } = require("./search/searchHelper.js");
+const { defineAIPhotoFilter, definePhotoStatistics } = require('./search/aiSearch.js');
+
 const UserModel = require("./models/Users.js");
 console.log("UserModel in server.js:", UserModel);
 const PORT = process.env.PORT || 5000;
@@ -54,14 +56,55 @@ const matchedUser = app.post("/api/login",
 	}
 );
 // Fetch Photos Route
-app.get("/api/photos", async (req, res) => {
-	try { const { search, date, page = 1 } = req.query;
-		const count = 50;
+app.get("/api/photos", async (
+	req, res) => {
+	try {
+		const { search, date, page = 1 } = req.query;
+		const count = process.env.NO_OF_PHOTOES;
+		console.log("COunt from ENV file", count);
 		const response = await axios.get(`${NASA_APOD_URL}?api_key=${NASA_API_KEY}&count=${count}`);
 		let photos = response.data;
 		photos = defineSearchByTitleFilter(photos, search);
-		const pageSize = 10; const startIndex = (page - 1) * pageSize;
+		//console.log("Searched Photoes in Server", photos);
+		// After searching the photoes then do some statistical calculations on the searched photoes.
+		console.log("Total Photoes in server.js:", photos.length); ;
+		const statisticsForSearchedPhotoes = definePhotoStatistics(photos);
+		console.log("Yearly displayed photoes", statisticsForSearchedPhotoes);
+		const pageSize = process.env.PAGE_SIZE;
+		console.log("Page size", pageSize);
+		const startIndex = (page - 1) * pageSize;
 		const paginatedPhotos = photos.slice(startIndex, startIndex + pageSize);
-		res.json({ photos: paginatedPhotos, total: photos.length }); }
-	catch (error) { res.status(500).json({ message: "Error fetching data from NASA API" }); } });
+		res.json({ photos: paginatedPhotos, total: photos.length, stats: statisticsForSearchedPhotoes });
+	}
+	catch (error) {
+		res.status(500).json
+		(
+			{ message: "Error fetching data from NASA API"
+			}
+		);
+	}
+}
+);
+
+//app.get("/api/photos", async (req, res) => {
+//	try {
+//		const { search, date, page = 1 } = req.query;
+//		const count = 50;
+//		const response = await axios.get(`${NASA_APOD_URL}?api_key=${NASA_API_KEY}&count=${count}`);
+//		let photos = response.data;
+
+		// Apply AI-based search filter
+//		photos = defineAIPhotoFilter(photos, search);
+//		const statistics = definePhotoStatistics(photos);
+
+//		const pageSize = 10;
+//		const startIndex = (page - 1) * pageSize;
+//		const paginatedPhotos = photos.slice(startIndex, startIndex + pageSize);
+
+//		res.json({ photos: paginatedPhotos, total: photos.length, stats: statistics });
+//	} catch (error) {
+//		res.status(500).json({ message: "Error fetching data from NASA API", error });
+//	}
+//});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
