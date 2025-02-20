@@ -19,7 +19,8 @@ function LoginPage({ setUser }) { const [username, setUsername] = useState("");
         }
     };
     return ( <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <h2>Login</h2>
+        <h2>Login to view NASA Photo Gallery</h2>
+        <img src='./staticImages/M78wideHiggins1024.jpg' alt="" width="450" height="400" />
         <form onSubmit={handleLogin}>
             <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} style={{ padding: "8px", margin: "5px" }} />
             <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding: "8px", margin: "5px" }} />
